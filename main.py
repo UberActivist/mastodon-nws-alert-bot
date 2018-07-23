@@ -15,12 +15,13 @@ def main():
     for i in current_feed.entries:
         global recent_date
         if recent_date is None:
-            recent_date = i.date
+            recent_date = i.updated
             print("First run, picked a date and stuck with it.")
             break
         elif i.cap_severity == alert_threshold:
-            if i.date < recent_date:
+            if i.updated < recent_date:
                 print("{} in {}".format(i["title"], i["cap_areadesc"]))
+                recent_date = i.updated
                 print("Date condition met.")
             else:
                 print("Date condition not met.")
