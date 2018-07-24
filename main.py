@@ -1,5 +1,17 @@
 import feedparser
+import json
 from time import sleep
+from mastodon import Mastodon
+
+with open('config.json') as file:
+    data = json.load(file)
+
+mastodon = Mastodon(
+    client_id = data["key"],
+    client_secret = data["secret"],
+    access_token = data["token"],
+    api_base_url = 'https://lgbtq.cool'
+)
 
 # Config
 nws_feed = "https://alerts.weather.gov/cap/us.php?x=1"
@@ -20,6 +32,7 @@ def get_recent_date(feed):
 
 def main():
     global recent_date
+    global mastodon
 
     current_feed = feedparser.parse(nws_feed)
     if recent_date is None:
@@ -29,7 +42,8 @@ def main():
     for i in current_feed.entries:
         if i.cap_severity in alert_thresholds:
             if i.published_parsed < recent_date:
-                print("{} in {}".format(i["title"], i["cap_areadesc"]))
+                status = "{}  More Info: {}".format(i["summary"], i["link"])
+                mastodon.status_post(status, spoiler_text="Weather alert in {}".format(i["cap_areadesc"]))
                 recent_date = i.published_parsed
                 print("Date condition met.")
             """else:
@@ -38,4 +52,4 @@ def main():
     main()
 
 
-#main()
+main()
